@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间的值为dao层接口的权限定名 -->
+<mapper namespace="com.tangjiantao.cms.dao.ArticleDao">
+	
+	<resultMap type="com.tangjiantao.cms.domain.Article" id="articleMap">
+		<id column="id" property="id"/>
+		<result column="title" property="title"/>
+		<result column="picture" property="picture"/>
+		<result column="hits" property="hits"/>
+		<result column="hot" property="hot"/>
+		<result column="status" property="status"/>
+		<result column="deleted" property="deleted"/>
+		<result column="created" property="created"/>
+		<result column="updated" property="updated"/>
+		<association property="user" javaType="User" select="com.tangjiantao.cms.dao.UserDao.getOne" column="user_id">
+		</association>
+	</resultMap>
+    
+    <resultMap type="com.tangjiantao.cms.domain.Article" id="articleContent" extends="articleMap">
+    		  <result column="content" property="content"/>
+    
+    </resultMap>
+    
+	<!-- 查询文章列表 -->
+	<select id="selectsByAdmin" resultMap="articleMap">
+		select * from cms_article
+		<where>
+			<if test="null!=userId">
+				and user_id=#{userId}
+			</if>
+		
+			<if test="null!=title and title !=''">
+				and title like '%${title}%'
+			</if>
+			<if test="null!=status and status!=-2">
+				and status=${status}
+			</if>
+			<if test="null!=channelId">
+				and channel_id=${channelId}
+			</if>
+			<if test="null!=categoryId">
+				and category_id=${categoryId}
+			</if>
+			
+			<if test="null!=hot and hot!=0">
+				and hot=1
+			</if>
+		</where>
+		order by created desc
+	</select>
+	
+	<!-- update文章 -->
+	<update id="update">
+		update cms_article set status=#{status} where id=${id}
+	</update>
+	
+	<!-- 详情 -->
+	<select id="select" resultMap="articleContent">
+		select * from cms_article where id=#{id}
+	</select>
+	
+	<!-- 所有栏目 -->
+	<select id="selectsCannel" resultType="Channel">
+		select * from cms_channel
+		
+	</select>
+	
+	<!-- 栏目下所有分类 -->
+	<select id="selectsCategory" resultType="Category">
+		select * from cms_category where channel_id=#{id}
+		
+	</select>
+	
+	<!-- 添加+上传 -->
+	<insert id="add">
+		insert into cms_article
+		
+		<set>
+			<if test="title!=null">
+				title=#{title},
+			</if>
+			<if test="content!=null">
+				content=#{content},
+			</if>
+			<if test="picture!=null">
+				picture=#{picture},
+			</if>
+			<if test="hits==null">
+				hits=0,
+			</if>
+			<if test="hot==null">
+				hot=0,
+			</if>
+			<if test="status==null">
+				status=0,
+			</if>
+			
+			<if test="deleted==null">
+				deleted=0,
+			</if>
+			<if test="created==null">
+				created=now(),
+			</if>
+			<if test="channelId!=null">
+				channel_id=#{channelId},
+			</if>
+			<if test="categoryId!=null">
+				category_id=#{categoryId},
+			</if>
+			<if test="userId!=null">
+				user_id=${userId}
+			</if>
+		
+		</set>
+	</insert>
+</mapper>

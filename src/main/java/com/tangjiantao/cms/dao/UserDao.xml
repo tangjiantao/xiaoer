@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间的值为dao层接口的权限定名 -->
+<mapper namespace="com.tangjiantao.cms.dao.UserDao">
+	<!-- 高级映射 -->
+	<resultMap type="com.tangjiantao.cms.domain.User"
+		id="userMap">
+		<id column="id" property="id" />
+		<result column="username" property="username" />
+		<result column="password" property="password" />
+
+		<!--性别在数据中是int类型 java类中是枚举类型 使用转换器 否则装载不了 -->
+		<!-- org.apache.ibatis.type.EnumTypeHandler org.apache.ibatis.type.EnumOrdinalTypeHandler -->
+		<result column="gender" property="gender"
+			javaType="com.tangjiantao.cms.domain.enums.Gender"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" />
+
+		<result column="birthday" property="birthday" />
+		<result column="created" property="created" />
+		<result column="locked" property="locked" />
+	</resultMap>
+	
+	<!--  注册 添加-->
+	<insert id="addUser">
+		insert into cms_user 
+		<set>
+		<if test="username!=null">
+			username=#{username},
+		</if>
+		<if test="password!=null">
+			password=#{password},
+		</if>
+		<if test="locked==null">
+			locked=0,
+		</if>
+		<if test="created==null">
+			created=now(),
+		</if>
+		</set>
+	</insert>
+
+	<!-- 查询此用户名数据库中是否存在 -->
+	<select id="getCountByUsername" resultType="int">
+		select count(*) from cms_user where username=#{username}
+
+	</select>
+
+	<!-- 登录 -->
+	<select id="login" resultType="User">
+		select * from cms_user where
+		username=#{username}
+	</select>
+
+	<!-- sql片段 -->
+	<sql id="user_cloum">id,username,password,birthday,gender,created,locked</sql>
+
+	<!-- 查询用户列表+模糊查询 -->
+	<select id="getUserList" resultMap="userMap">
+		select
+		<include refid="user_cloum" />
+		from cms_user
+
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="null!=username and username!=''"> and username like concat('%',#{username},'%')</if>
+		</trim>
+	</select>
+
+	<!-- 查询单个用户 -->
+	<select id="getOne" resultMap="userMap">
+		select
+		<include refid="user_cloum" />
+		from cms_user where id=#{id}
+	</select>
+
+	<!-- 用户是否禁用 -->
+	<update id="updateLocked">
+		update cms_user set locked=#{locked} where id=#{id}
+	</update>
+</mapper>

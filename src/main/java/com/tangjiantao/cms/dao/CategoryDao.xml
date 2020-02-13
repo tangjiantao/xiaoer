@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间的值为dao层接口的权限定名 -->
+<mapper namespace="com.tangjiantao.cms.dao.CategoryDao">
+	<!-- 查询本栏目下的所有分类 -->
+	<select id="selects" resultType="Category">
+		select * from cms_category where channel_id=${channelId}
+	</select>
+</mapper>
