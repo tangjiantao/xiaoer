@@ -67,6 +67,20 @@ public class ArticleServiceImpl implements ArticleService {
 		articleDao.add(article);
 	}
 
+	//24小时内文章
+	@Override
+	public List<Article> select24Article(String createTime) {
+		// TODO Auto-generated method stub
+		return articleDao.select24Article(createTime);
+	}
+
+	//查询热门文章
+	@Override
+	public List getHotList() {
+		// TODO Auto-generated method stub
+		return articleDao.getHotList();
+	}
+
 	
 	
 }

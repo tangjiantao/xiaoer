@@ -23,11 +23,11 @@
 		<div class="row">
 			<div class="col-md-12"
 				style="background-color: #222222; height: 40px;">
-				
+
 				<jsp:include page="/WEB-INF/view/index/top.jsp"></jsp:include>
 			</div>
-				
-				
+
+
 		</div>
 
 
@@ -170,6 +170,36 @@
 						</c:forEach>
 					</ul>
 				</div>
+
+				<hr style="border-color: red">
+				<span>24小时热文</span>
+				<c:forEach items="${list}" var="a">
+					<div class="card">
+						<div class="card-body">
+							<div class="media">
+
+								<img style="width: 70px; height: 70px" src="/pic/${a.picture }"
+									class="mr-3" alt="...">
+								<div class="media-body">
+									<h5 class="mt-0">
+										<a href="">${a.title }</a>
+									</h5>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</c:forEach>
+
+				<hr style="border-color: red">
+				<span>热门文章</span>
+				<c:forEach items="${hotList}" var="a">
+					<ul class="list-group">
+						<li class="list-group-item"><a href="">${a.title }</a></li>
+					</ul>
+
+				</c:forEach>
+
 			</div>
 
 		</div>
@@ -177,13 +207,13 @@
 
 
 
-			<!-- 下 -->
-			<div class="row">
-				<div class="col-md-12" style="padding-top: 50px">
+		<!-- 下 -->
+		<div class="row">
+			<div class="col-md-12" style="padding-top: 50px">
 
-					<p class="text-center">唐建涛版权所有</p>
-				</div>
+				<p class="text-center">唐建涛版权所有</p>
 			</div>
+		</div>
 
 
 

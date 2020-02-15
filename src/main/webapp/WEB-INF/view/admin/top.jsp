@@ -3,7 +3,7 @@
    <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
       <a class="navbar-brand mr-1" href="index.html">CMS系统后台</a>
-      <h3>管理员:${sessionScope.user.username }</h3>
+      <h3 style="color: pink">管理员:${sessionScope.user.username }</h3>
 
       <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle">
         <i class="fas fa-bars"></i>

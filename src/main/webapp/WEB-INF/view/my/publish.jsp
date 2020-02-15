@@ -82,7 +82,7 @@
 		//封装富文本中的html内容
 		formData.append("content", editor1.html());
 
-		alert("111")
+		
 		//ajax提交
 		$.ajax({
 			// 告诉jQuery不要去处理发送的数据

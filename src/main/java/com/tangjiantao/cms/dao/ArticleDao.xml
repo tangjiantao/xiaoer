@@ -24,6 +24,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     </resultMap>
     
+    <!-- 查询热门文章 -->
+    <select id="getHotList" resultMap="articleMap">
+    	select * from cms_article where hot=1 ORDER BY created desc  limit 10
+    </select>
+    
 	<!-- 查询文章列表 -->
 	<select id="selectsByAdmin" resultMap="articleMap">
 		select * from cms_article
@@ -50,6 +55,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</if>
 		</where>
 		order by created desc
+	</select>
+	
+	<!--查询24小时内文章  -->
+	<select id="select24Article" resultMap="articleMap">
+		select * from cms_article where created>=#{createTime}
 	</select>
 	
 	<!-- update文章 -->

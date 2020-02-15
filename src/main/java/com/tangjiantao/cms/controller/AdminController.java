@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.bw.utils.DateUtil;
 import com.bw.utils.StringUtil;
 import com.github.pagehelper.PageInfo;
 import com.tangjiantao.cms.domain.Article;
@@ -83,6 +84,20 @@ public class AdminController {
 		//显示最新文章
 		PageInfo<Article> info2 = articleService.selectsByAdmin(article, pageNum, pageSize);
 		m.addAttribute("newArcitles", info2.getList());
+		
+		//查询24小时内文章  2020-2-13 9:37:40    2020-2-12 9:37:40
+		//两种方式处理  1.sql:  now()-INTERVAL 24 hour
+		//2.通过工具类(Java)代码获得24小时之前的时间
+		long time=24*60*60*1000;
+		String createTime = DateUtil.getIntervalDate(time);
+		
+		//查询24小时内文章>=createTime
+		List<Article> list=articleService.select24Article(createTime);
+		m.addAttribute("list",list);
+		
+		//查询热门文章
+		List hotList=articleService.getHotList();
+		m.addAttribute("hotList",hotList);
 		
 		return "index/index";
 	}
