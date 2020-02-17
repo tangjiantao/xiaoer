@@ -66,7 +66,7 @@
 			<nav class="nav flex-column">
 			<a class="list-group-item active" href="#" data="/article/selectArticle">查看文章</a>
 			<a class="list-group-item "  href="javascript:void(0)" data="/article/toAdd">发布文章</a>	
-			<a class="list-group-item "  href="#" data="/article/addArticle">资料管理</a>
+			<a class="list-group-item "  href="#" data="/favorite/selects">我的收藏</a>
 			<a class="list-group-item "  href="#" data="/article/addArticle">其他管理</a>
 				
 	

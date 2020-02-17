@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangjiantao.cms.dao.FavoriteDao">
+	
+
+	<!-- 展示收藏夹 -->
+	<select id="getFavoList" resultType="com.tangjiantao.cms.domain.Favorite">
+		select * from cms_favorite where user_id=#{id} order by created desc
+	</select>
+
+	<!-- //执行收藏 -->
+	<insert id="addFavo">
+		insert into cms_favorite set text=#{text},url=#{url},user_id=#{user.id},created=now()
+	</insert>
+
+</mapper>
