@@ -6,6 +6,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.bw.utils.DateUtil;
 import com.bw.utils.StringUtil;
 import com.github.pagehelper.PageInfo;
+import com.tangjiantao.cms.dao.ArticleRepository;
 import com.tangjiantao.cms.domain.Article;
 import com.tangjiantao.cms.domain.Category;
 import com.tangjiantao.cms.domain.Channel;
@@ -26,6 +29,7 @@ import com.tangjiantao.cms.service.ChannelService;
 import com.tangjiantao.cms.service.SlideService;
 import com.tangjiantao.cms.service.UserService;
 import com.tangjiantao.cms.utils.CMSJsonUtil;
+import com.tangjiantao.cms.utils.HLUtils;
 
 /**
  * 
@@ -49,7 +53,41 @@ public class AdminController {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	ElasticsearchTemplate elasticsearchTemplate;
+	
+	@Autowired
+	RedisTemplate redisTemplate;
+	
+	@Autowired
+	private ArticleRepository articleRepository;
+	//搜索的方法
+	@RequestMapping("/search")
+	public String search(String key,Model model,@RequestParam(defaultValue = "1")int pageNum,@RequestParam(defaultValue="5")int pageSize) {
+		//这里搜索是从es索引库中搜索 不是从mysql中搜索
+		//这个时候 就需要ssm中整合es呗
+		//这里可以直接使用es搜索了吗 因为咱们的es索引库还没有数据 es服务还没有开启
+		//需求：想要能在前台利用es搜索到文章数据 必须把mysql中的数据导入到es的索引库中
+		
+		//这就是咱们的普通搜索(非高亮)
+//		List<cms_article> list = articleRepository.findByTitle(key);
+		//这是咱们的高亮搜索
+		//可以调用工具类实现高亮:
+		//搜索需要的模板类 2指定要操作的实体类类型 3当前页 4每页页数显示多少条 5是一个string类型的数组里存放的是：来进行搜索的字段（必须和实体类一致）6指定要排序的字段 7.搜索的关键字
+	//	List<Article> list = articleRepository.findByTitle(key);
+		
+		PageInfo<Article> info = (PageInfo<Article>) HLUtils.findByHighLight(elasticsearchTemplate, Article.class, pageNum, pageSize, new String[] {"title"}, "id", key);
+		
+		model.addAttribute("info",info.getList());
+		model.addAttribute("pageInfo", info);
+		
+		return "index/index";
+	}
+	
+	
+	
 	// 进入首页
+	@SuppressWarnings("unchecked")
 	@RequestMapping("index")
 	public String index(Model m, Article article, @RequestParam(defaultValue = "1") Integer pageNum,
 			@RequestParam(defaultValue = "5") Integer pageSize) {
@@ -74,10 +112,50 @@ public class AdminController {
 			//查询所有的广告   作为轮播图
 			List<Slide> slideList=slideService.selects();
 			m.addAttribute("slideList", slideList);
+			
 			//查询所有的热门文章
 			article.setHot(1);
-			PageInfo<Article> info = articleService.selectsByAdmin(article, pageNum, pageSize);
-			m.addAttribute("articleList", info.getList());
+			
+			///////热点文章start/////////
+			//==========热点文章====================================
+			//用redis来优化
+			//===========第一次访问==============================
+			//1.先从redis中查询数据（无论有没有都查）
+			
+			//设置开始时间
+			long start = System.currentTimeMillis();
+			
+			List<Article> reidsArticles = redisTemplate.opsForList().range("hot_articles", 0, 5);
+			
+			long end = System.currentTimeMillis();
+			
+			System.out.println("从redis中查询耗时："+(end-start));
+			
+			//2.对redis中查询出来的数据进行非空判断
+			
+			
+			//==========第二次，第n次===========
+			//4.非空--------------》说明已经有数据了直接返回（从而保证以后查询从性能高的redis中）
+			if (reidsArticles!=null&&reidsArticles.size()!=0) {
+				System.err.println("热点文章从reids中查询了");
+				//说明redis中有数据
+				m.addAttribute("selectsByAdmin", reidsArticles);
+				
+			}else {
+				//3.空------》从mysql查询 保存数据到redis数据库 返回前台
+				long start1 = System.currentTimeMillis();
+				PageInfo<Article> info = articleService.selectsByAdmin(article, pageNum, pageSize);
+				long end1 = System.currentTimeMillis();
+				System.out.println("从mysql中查询耗时："+(end1-start1));
+				System.err.println("热点文章从mysql中查询了");
+				m.addAttribute("articleList", info.getList());
+				//存集合的时候一定要把集合转成数组
+				redisTemplate.opsForList().leftPushAll("", info.getList().toArray());
+				System.err.println("热点文章保存到了redis数据库");
+			}
+			
+			
+			///////热点文章end/////////
 		}
 		m.addAttribute("article", article);
 		
@@ -178,5 +256,10 @@ public class AdminController {
 			// 登录成功跳转到 主页
 			cju.setMsg("true");
 			return cju;
+		}
+		
+		public static void main(String[] args) {
+			Thread thread = new Thread();
+			thread.start();
 		}
 }

@@ -4,6 +4,7 @@
         xmlns:context="http://www.springframework.org/schema/context" 
         xmlns:aop="http://www.springframework.org/schema/aop"
         xmlns:tx="http://www.springframework.org/schema/tx" 
+        xmlns:task="http://www.springframework.org/schema/task"
         xsi:schemaLocation="
         http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
@@ -12,8 +13,22 @@
         http://www.springframework.org/schema/aop 
         http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
         http://www.springframework.org/schema/tx 
-        http://www.springframework.org/schema/tx/spring-tx-4.2.xsd"> 
+        http://www.springframework.org/schema/tx/spring-tx-4.2.xsd  
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd"> 
+        
        
+       
+        <!-- spring线程池的配置 -->
+		<task:executor id="executor" pool-size="10-1000" queue-capacity="10" keep-alive="10" rejection-policy="CALLER_RUNS" />
+     
+        <!-- 加载kafka生产者的配置文件 -->
+        <import resource="classpath:producer.xml" />
+       <!-- 加载es的配置文件 -->
+        <import resource="classpath:es.xml" />
+         <!-- 加载kafka消费者的配置文件 -->
+        <import resource="classpath:consumer.xml" />
+        <!-- 加载redis的配置文件 -->
+        <import resource="classpath:redis.xml"/>
       <!-- 注解扫描器，扫描每一层 -->
       <context:component-scan base-package="com.tangjiantao.cms"/>
       <!-- 加载外部资源文件 -->
@@ -54,18 +69,18 @@
 			</aop:config>
 		-->
 		<!-- 配置事务通知 -->
-		<!-- 
-			<tx:advice id="advice" transaction-manager="transactionManager">
+		
+		<!-- 	<tx:advice id="advice" transaction-manager="transactionManager">
 				<tx:attributes>
 					<tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
 					<tx:method name="upd*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
 					<tx:method name="del*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
 					<tx:method name="*"    read-only="true"/>
 				</tx:attributes>
-			</tx:advice>
-		 -->
+			</tx:advice> -->
+		
 		
 		<!-- 注解式事务：开启事务注解 -->
-	  <tx:annotation-driven transaction-manager="transactionManager"/>
+	<!--   <tx:annotation-driven transaction-manager="transactionManager"/> -->
 		
 </beans>

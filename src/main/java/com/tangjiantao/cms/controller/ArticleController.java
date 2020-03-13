@@ -1,12 +1,14 @@
 package com.tangjiantao.cms.controller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,11 +16,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
+import com.tangjiantao.cms.dao.ArticleRepository;
 import com.tangjiantao.cms.domain.Article;
 import com.tangjiantao.cms.domain.Category;
 import com.tangjiantao.cms.domain.Channel;
+import com.tangjiantao.cms.domain.Content;
 import com.tangjiantao.cms.domain.User;
+import com.tangjiantao.cms.domain.enums.ContentType;
 import com.tangjiantao.cms.service.ArticleService;
 
 //import com.tangjiantao.cms.utils.PageUtil;
@@ -35,7 +41,13 @@ import com.tangjiantao.cms.service.ArticleService;
 public class ArticleController {
 
 	@Autowired
+	KafkaTemplate<String,String> kafkaTemplate;
+	
+	@Autowired
 	private ArticleService service;
+	
+	@Autowired
+	ArticleRepository articleRepository;
 
 	// 个人查看文章
 	@RequestMapping("selectArticle")
@@ -70,9 +82,28 @@ public class ArticleController {
 		return "admin/article";
 	}
 
+	//审核文章的方法
+	//审核文章的时候 不让他同步es索引库了 直接发送到kafka一条消息 通知消费者让消费者去同步es 解耦
 	@ResponseBody
 	@RequestMapping("updateArcitle")
 	public boolean update(Article article) {
+	
+		//直接发送kafka 通知消费者去同步es索引库
+		//1.ssm中整合kafka的生产者
+		//2.可以注入kafkaTeplat
+		//3.调用发送消息
+		kafkaTemplate.send("article","shenhe"+"="+article.getId()+"");
+		
+		//
+		
+		//================================================
+		//审核文章的同时 添加es索引库	
+	//	System.err.println(article);
+		//根据id来从mysql中查询文章的数据
+	//	Article select = service.select(article.getId());
+		//把这个文章的数据保存到es索引库
+	//	articleRepository.save(select);
+	//	System.err.println("同步es索引库成功");
 		return service.upate(article);
 
 	}
@@ -81,6 +112,8 @@ public class ArticleController {
 	@ResponseBody
 	@RequestMapping("select")
 	public Object select(int id) {
+		
+		
 		Article article = service.select(id);
 
 		return article;
@@ -146,4 +179,7 @@ public class ArticleController {
 		}
 
 	}
+	
+	
+	
 }

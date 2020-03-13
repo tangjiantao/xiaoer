@@ -27,4 +27,5 @@ public interface ArticleService {
 	public List<Article> select24Article(String createTime);
 	//查询热门文章
 	public List getHotList();
+	
 }

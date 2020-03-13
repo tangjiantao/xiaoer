@@ -54,6 +54,19 @@
 
 			<!--  中间的中间-->
 			<div class="col-md-7 split">
+			
+			<!-- 搜索框 -->
+				<form action="/search" method="get">
+					<div class="input-group mb-3">
+						<input type="text" name="key" value="${key}" class="form-control"
+							placeholder="请输入要搜索的内容" aria-label="Recipient's username"
+							aria-describedby="button-addon2">
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary" id="button-addon2">搜索</button>
+						</div>
+					</div>
+				</form>
+				
 				<!-- 第一次进入 没有选择栏目  默认显示轮播图和热门文章 -->
 				<c:if test="${article.channelId==null}">
 
@@ -133,7 +146,7 @@
 					</div>
 					<hr>
 
-					<div id="article">
+					<%-- <div id="article">
 
 						<ul class="list-unstyled">
 							<c:forEach items="${info.list }" var="a">
@@ -153,10 +166,32 @@
 						</ul>
 
 
-					</div>
+					</div> --%>
 
 
 				</c:if>
+				
+				<!-- 显示文章 -->
+				<div id="article">
+
+					<ul class="list-unstyled">
+						<c:forEach items="${info }" var="a">
+							<li class="media"><img src="/pic/${a.picture }" class="mr-3"
+								alt="..." width="160px" height="100px">
+								<div class="media-body text-center">
+									<h5 class="mt-0 mb-1 ">
+										<a href="/selectar?id=${a.id }" onclick="look(${a.id})"
+											style="font-size: 15px;" data-target="#exampleModal">${a.title }</a>
+									</h5>
+									<br> ${a.user.username }&nbsp;&nbsp;&nbsp;
+									<fmt:formatDate value="${a.created }" pattern="yyyy-MM-dd" />
+								</div></li>
+							<hr>
+
+						</c:forEach>
+					</ul>
+
+				</div>
 
 
 			</div>
@@ -215,7 +250,9 @@
 			</div>
 		</div>
 
-
+	<!-- 这是一个最简单的分页 -->
+	<a href="search?key=${key }&pageNum=${pageInfo.pageNum>1?pageInfo.pageNum-1:pageInfo.pageNum}">上一页</a>
+	<a href="search?key=${key }&pageNum=${pageInfo.pageNum==pageInfo.pages?pageInfo.pageNum:pageInfo.pageNum+1 }">下一页</a>
 
 
 	</div>
